@@ -7,7 +7,7 @@ module.exports = (schema) => (req, resp, next) => {
 
   if (error) {
     const messages = error.details.map((d) => d.message);
-    return validationError(resp,error) 
+    return validationError(resp,messages) 
   }
 
   next(); // validation passed
