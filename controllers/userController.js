@@ -49,7 +49,7 @@ exports.login = async (req, resp) => {
     if (!validPassword) {
       return errorResponse(resp, "invalid credential", 401);
     }
-    console.log(validPassword);
+    // console.log(validPassword);
 
     if (userExist.status != "approved") {
       return unauthorized(resp);

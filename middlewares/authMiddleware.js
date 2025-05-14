@@ -9,6 +9,7 @@ const auth = (req, resp, next) => {
     const decodeToken = jsonwebtoken.verify(token, process.env.JWT_SECRET);
     console.log(decodeToken);
     req.userId = decodeToken.userId;
+    req.role=decodeToken.role;
     next();
   } catch (error) {
     return resp.status(401).json({ message: "Invalid token" });

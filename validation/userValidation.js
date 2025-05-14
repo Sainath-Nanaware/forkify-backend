@@ -44,6 +44,16 @@ const updateUserSchema = Joi.object({
 
 });
 
-module.exports = { registerSchema, loginSchema,updateUserSchema };
+
+const updateUserStatusSchema = Joi.object({
+  status: Joi.string()
+    .valid("pending", "approved", "blocked")
+    .required()
+    .messages({
+      "any.only": "Status must be pending, approved or blocked",
+    }),
+});
+
+module.exports = { registerSchema, loginSchema,updateUserSchema,updateUserStatusSchema};
 
 
