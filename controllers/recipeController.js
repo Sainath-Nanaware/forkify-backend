@@ -74,3 +74,41 @@ exports.deleteRecipe=async(req,resp)=>{
       errorResponse(resp, "Internal server error", 500, error);
     }
 }
+
+
+exports.allRecipe=async(req,resp)=>{
+  logger.info("control in get all recipe")
+  try{
+    const allRecipes=await Recipe.find()
+    logger.info("send all recipes")
+    successResponse(resp, allRecipes, "all recipes list", 200);
+    
+  }catch(error){
+    logger.error("internal server error");
+    console.log(error);
+    errorResponse(resp, "Internal server error", 500, error);
+  }
+}
+
+exports.recipeById=async(req,resp)=>{
+    logger.info("control in get recipe by id");
+    const recipeId = req.params.recipeId;
+    if (!recipeId || !mongoose.Types.ObjectId.isValid(recipeId)) {
+      logger.warn("recipe id invalid");
+      return errorResponse(resp, "valid recipe Id is required", 400);
+    } 
+    try{
+      const recipe=await Recipe.findById(recipeId)
+      if(!recipe){
+        logger.warn("recipe not found")
+        return errorResponse(resp,"recipe not found",400)
+      }
+      logger.info("recipe found")
+      successResponse(resp, recipe, "recipes info", 200);
+      
+    }catch(error){
+      logger.error("internal server error");
+      console.log(error);
+      errorResponse(resp, "Internal server error", 500, error);
+    }
+}
