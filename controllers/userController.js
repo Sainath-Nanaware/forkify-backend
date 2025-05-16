@@ -1,6 +1,8 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const logger = require("../logs/logger");
+
 
 const {
   successResponse,
@@ -9,6 +11,7 @@ const {
 } = require("../utils/responseHandler");
 
 exports.registration = async (req, resp) => {
+  logger.info("control in registration");
   const { username, email, password, role, status } = req.body;
   try {
     // console.log("email:",email);
@@ -16,6 +19,7 @@ exports.registration = async (req, resp) => {
     const userExist = await User.findOne({ email });
     // console.log(userExist)
     if (userExist) {
+      logger.warn("user already exist")
       return errorResponse(resp, "user already exist!", 400);
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,21 +32,25 @@ exports.registration = async (req, resp) => {
     });
     if (role) newUser.role = role;
     if (status) newUser.status = status;
+    logger.info("user create")
     successResponse(resp, newUser, "User registred", 201);
   } catch (error) {
+    logger.error("internal server error!")
     errorResponse(resp, "Internal server error", 500, error);
     console.log(error);
   }
 };
 
 exports.login = async (req, resp) => {
+ logger.info("control in login")
   const { email, password } = req.body;
-  console.log("check login credentials");
+  // console.log("check login credentials");
 
   try {
     const userExist = await User.findOne({ email });
     // console.log(userExist);
     if (!userExist) {
+      logger.warn("user not found")
       return errorResponse(resp, "invalid credential", 401);
     }
     const validPassword = await bcrypt.compare(password, userExist.password);
@@ -52,6 +60,7 @@ exports.login = async (req, resp) => {
     // console.log(validPassword);
 
     if (userExist.status != "approved") {
+      logger.warn("user not approved")
       return unauthorized(resp);
     }
     const token = jwt.sign(
@@ -61,19 +70,23 @@ exports.login = async (req, resp) => {
         expiresIn: "1h",
       }
     );
+    logger.info("user login succesfully")
     successResponse(resp, token, "User login succesfully", 200);
   } catch (error) {
+    logger.error("internal server error")
     errorResponse(resp, "Internal server error", 500, error);
     console.log(error);
   }
 };
 
 exports.update = async (req, resp) => {
+  logger.info("control in update user")
   const { id } = req.params;
   try {
     const updateData = { ...req.body };
     const user = await User.findById(id);
     if (!user){
+        logger.warn("user not found")
         return errorResponse(resp, "User not found", 404);
     }
     if (updateData.username) user.username = updateData.username;
@@ -87,10 +100,11 @@ exports.update = async (req, resp) => {
     );
 
     if (!updatedUser) return errorResponse(resp, "User not found", 404);
-
+    logger.info("user data updated")
     return successResponse(resp, updatedUser, "User updated successfully");
   } catch (err) {
     console.log(err);
+    logger.error("internal server error")
     return errorResponse(resp, "Internal server error", 500, err);
   }
 };

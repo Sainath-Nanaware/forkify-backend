@@ -7,7 +7,7 @@ const auth = (req, resp, next) => {
   }
   try {
     const decodeToken = jsonwebtoken.verify(token, process.env.JWT_SECRET);
-    console.log(decodeToken);
+    // console.log(decodeToken);
     req.userId = decodeToken.userId;
     req.role=decodeToken.role;
     next();
