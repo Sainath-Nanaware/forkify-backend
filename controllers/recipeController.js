@@ -112,3 +112,24 @@ exports.recipeById=async(req,resp)=>{
       errorResponse(resp, "Internal server error", 500, error);
     }
 }
+//given api only for single mealtype
+exports.recipeByMealType=async(req, resp)=>{
+      logger.info("control in get recipe by meal type")
+      const {mealType}=req.query
+      if(!mealType){
+        logger.warn("meal type invalid");
+        return errorResponse(resp, "valid meal type is required", 400);
+      }
+      try{
+        const recipes = await Recipe.find({
+          mealType: { $regex: new RegExp(mealType, "i") },
+        })
+        logger.info("meal recipes found");
+        successResponse(resp, recipes, `all ${mealType} recipes`, 200);
+
+      }catch(error){
+        logger.error("internal server error");
+        console.log(error);
+        errorResponse(resp, "Internal server error", 500, error);
+      }
+}

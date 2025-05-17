@@ -13,7 +13,8 @@ const {
   updateRecipe,
   deleteRecipe,
   allRecipe,
-  recipeById
+  recipeById,
+  recipeByMealType
 } = require("../controllers/recipeController");
 
 router.post("/",auth,roleCheck(["chef"]),validate(createRecipeSchema),createRecipe);
@@ -21,6 +22,7 @@ router.put("/:recipeId",auth,roleCheck(["chef"]),validate(updateRecipeSchema),up
 router.delete("/:recipeId",auth,roleCheck(["chef"]),deleteRecipe);
 router.get("/",auth,allRecipe)
 router.get("/:recipeId",auth,recipeById)
+router.get("/mealRecipes/recipe",auth,recipeByMealType)
 
 
 
