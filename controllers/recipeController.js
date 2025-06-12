@@ -78,10 +78,20 @@ exports.deleteRecipe=async(req,resp)=>{
 
 exports.allRecipe=async(req,resp)=>{
   logger.info("control in get all recipe")
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   try{
-    const allRecipes=await Recipe.find()
+    const skip=(page-1)*limit
+    const totalRecipes=await Recipe.countDocuments();
+    const allRecipes = await Recipe.find().skip(skip).limit(limit);
+    const respData = {
+      totalRecipes,
+      totalPages: Math.ceil(totalRecipes / limit),
+      currentPage: page,
+      recipes:allRecipes,
+    };
     logger.info("send all recipes")
-    successResponse(resp, allRecipes, "all recipes list", 200);
+    successResponse(resp, respData, "all recipes list", 200);
     
   }catch(error){
     logger.error("internal server error");
@@ -132,4 +142,23 @@ exports.recipeByMealType=async(req, resp)=>{
         console.log(error);
         errorResponse(resp, "Internal server error", 500, error);
       }
+}
+
+exports.randomRecipes=async(req,resp)=>{
+  logger.info("control in get random recipes")
+  const limit=parseInt(req.params.limit)||5
+  // console.log(limit)
+  try{
+    const recipes = await Recipe.aggregate([
+      { $sample: { size: limit } }, // pick 5 random documents
+    ]);
+    logger.info("random recipes found")
+    successResponse(resp, recipes, `all recipes`, 200);
+
+  }catch(error){
+        logger.error("internal server error");
+        console.log(error);
+        errorResponse(resp, "Internal server error", 500, error);
+  }
+
 }
