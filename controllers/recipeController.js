@@ -126,16 +126,33 @@ exports.recipeById=async(req,resp)=>{
 exports.recipeByMealType=async(req, resp)=>{
       logger.info("control in get recipe by meal type")
       const {mealType}=req.query
+      const page =parseInt(req.query.page)||1
+      const limit=parseInt(req.query.limit)||10
       if(!mealType){
-        logger.warn("meal type invalid");
+        logger.warn("meal type not present in request");
         return errorResponse(resp, "valid meal type is required", 400);
       }
       try{
-        const recipes = await Recipe.find({
-          mealType: { $regex: new RegExp(mealType, "i") },
-        })
+        const skip = (page - 1) * limit;
+        const query={}
+        if(mealType !=="all"){
+          query.mealType={ $regex: new RegExp(mealType, "i") }
+        }
+
+         const [recipes, totalRecipes] = await Promise.all([
+           Recipe.find(query).skip(skip).limit(limit),
+           Recipe.countDocuments(query),
+         ]);
+         const respData = {
+           totalRecipes,
+           totalPages: Math.ceil(totalRecipes / limit),
+           currentPage: page,
+           recipes: recipes,
+         };
+
+
         logger.info("meal recipes found");
-        successResponse(resp, recipes, `all ${mealType} recipes`, 200);
+        successResponse(resp, respData, `all ${mealType} recipes`, 200);
 
       }catch(error){
         logger.error("internal server error");
