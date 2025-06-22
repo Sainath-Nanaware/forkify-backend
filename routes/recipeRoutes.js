@@ -18,7 +18,17 @@ const {
   randomRecipes,
 } = require("../controllers/recipeController");
 
-router.post("/",auth,roleCheck(["chef"]),validate(createRecipeSchema),createRecipe);
+const {upload}=require('../utils/cloudinaryStrorage')
+//if we want upload multiple files use upload.array()
+
+router.post(
+  "/",
+  auth,
+  roleCheck(["chef"]),
+  validate(createRecipeSchema),
+  upload.single("image"),
+  createRecipe
+);
 router.put("/:recipeId",auth,roleCheck(["chef"]),validate(updateRecipeSchema),updateRecipe);
 router.delete("/:recipeId",auth,roleCheck(["chef"]),deleteRecipe);
 router.get("/",auth,allRecipe)

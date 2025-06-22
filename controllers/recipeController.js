@@ -12,18 +12,45 @@ const {
 
 exports.createRecipe=async(req,resp)=>{
     logger.info("control in create recipe")
-    const recipeData=req.body
+    
     try{
-        const recipe=await Recipe.create(recipeData)
-        logger.info("new recipe added")
-        successResponse(resp,recipe,"new recipe added",201)
-
+      var {
+        title,
+        description,
+        ingredients,
+        steps,
+        tags,
+        mealType,
+      } = req.body;
+      // console.log("req.body",req.body)
+      // console.log("FILE:", req.file);
+      ingredients = JSON.parse(ingredients|| "[]");
+      steps = JSON.parse(steps || "[]");
+      tags = JSON.parse(tags || "[]");
+      mealType = JSON.parse(mealType || "[]");
+      //  const mealType = Array.isArray(rawMealType)
+      //    ? rawMealType.flat(Infinity)
+      //    : [];
+      const recipeInfo = {
+        title,
+        description,
+        ingredients,
+        steps,
+        tags,
+        mealType,
+        image: req.file?.path || null,
+        createdBy: req.userId,
+      };
+      const recipe = await Recipe.create(recipeInfo);
+      logger.info("new recipe added");
+      successResponse(resp, recipe, "new recipe added", 201);
     }catch(error){
         logger.error("internal server error")
         console.log(error);
         errorResponse(resp, "Internal server error", 500, error);
     }    
 }
+
 
 exports.updateRecipe=async(req,resp)=>{
     logger.info("control in update recipe")

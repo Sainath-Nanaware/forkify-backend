@@ -5,10 +5,10 @@ const createRecipeSchema = Joi.object({
   title: Joi.string().trim().required(),
   description: Joi.string().trim().required(),
   image: Joi.string().uri().required(), // Validates that it's a valid URL
-  ingredients: Joi.array().items(Joi.string().trim()).min(1).required(),
-  steps: Joi.array().items(Joi.string().trim()).min(1).required(),
-  mealType: Joi.array().items(Joi.string().trim()),
-  tags: Joi.array().items(Joi.string().trim()),
+  // ingredients: Joi.string().items(Joi.string().trim()).min(1).required(),
+  // steps: Joi.string().items(Joi.string().trim()).min(1).required(),
+  // mealType: Joi.string().items(Joi.string().trim()),
+  // tags: Joi.string().items(Joi.string().trim()),
   createdBy: Joi.string()
     .custom((value, helpers) => {
       // Validate if it's a valid MongoDB ObjectId
@@ -16,7 +16,7 @@ const createRecipeSchema = Joi.object({
         return helpers.message('"createdBy" must be a valid ObjectId');
       }
       return value;
-    }).required(),
+    }),
 });
 const updateRecipeSchema = Joi.object({
   title: Joi.string().trim(),
