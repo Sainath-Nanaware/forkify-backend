@@ -206,3 +206,36 @@ exports.randomRecipes=async(req,resp)=>{
   }
 
 }
+
+
+exports.recipesByChefId=async(req,resp)=>{
+    logger.info("controls:get all recipes by chef id")
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const {chefId}=req.query;
+    if (!chefId || !mongoose.Types.ObjectId.isValid(chefId)) {
+      logger.warn("chef id invalid");
+      return errorResponse(resp, "valid chef Id is required", 400);
+    }   
+    try{
+       const skip = (page - 1) * limit;
+       const query={createdBy:chefId}
+       const [recipes, totalRecipes] = await Promise.all([
+         Recipe.find({ createdBy: chefId }).skip(skip).limit(limit),
+         Recipe.countDocuments(query),
+       ]);
+       const respData = {
+         totalRecipes,
+         totalPages: Math.ceil(totalRecipes / limit),
+         currentPage: page,
+         recipes: recipes,
+       };
+       logger.info("Info:Get all recipes of chef")
+       successResponse(resp,respData,"All Recipes of chef:",200);
+
+    } catch (error) {
+      logger.error("internal server error");
+      console.log(error);
+      errorResponse(resp, "Internal server error", 500, error);
+    }
+}

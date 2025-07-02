@@ -16,6 +16,7 @@ const {
   recipeById,
   recipeByMealType,
   randomRecipes,
+  recipesByChefId,
 } = require("../controllers/recipeController");
 
 const {upload}=require('../utils/cloudinaryStrorage')
@@ -35,6 +36,7 @@ router.get("/",auth,allRecipe)
 router.get("/:recipeId",auth,recipeById)
 router.get("/demoRecipes/:limit",randomRecipes)
 router.get("/mealRecipes/recipe",auth,recipeByMealType)
+router.get("/all/chefRecipes",auth,recipesByChefId)
 
 
 
