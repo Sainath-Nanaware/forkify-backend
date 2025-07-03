@@ -71,7 +71,7 @@ exports.login = async (req, resp) => {
       }
     );
     logger.info("user login succesfully")
-    successResponse(resp, {token,role:userExist.role}, "User login succesfully", 200);
+    successResponse(resp, {token,role:userExist.role,id:userExist._id}, "User login succesfully", 200);
   } catch (error) {
     logger.error("internal server error")
     errorResponse(resp, "Internal server error", 500, error);

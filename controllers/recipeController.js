@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Recipe=require("../models/recipeModel")
 const mongoose=require("mongoose")
+const {ObjectId}=require("bson")
 const logger=require("../logs/logger")
 const {
   successResponse,
@@ -212,7 +213,9 @@ exports.recipesByChefId=async(req,resp)=>{
     logger.info("controls:get all recipes by chef id")
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const {chefId}=req.query;
+    var {chefId}=req.query;
+    // chefId=new ObjectId(chefId);
+    // console.log(chefId)
     if (!chefId || !mongoose.Types.ObjectId.isValid(chefId)) {
       logger.warn("chef id invalid");
       return errorResponse(resp, "valid chef Id is required", 400);
