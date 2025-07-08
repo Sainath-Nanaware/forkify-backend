@@ -9,6 +9,8 @@ const {
   errorResponse,
   unauthorized,
 } = require("../utils/responseHandler");
+const { default: mongoose } = require("mongoose");
+const { ObjectId } = require("bson");
 
 exports.registration = async (req, resp) => {
   logger.info("control in registration");
@@ -108,3 +110,98 @@ exports.update = async (req, resp) => {
     return errorResponse(resp, "Internal server error", 500, err);
   }
 };
+
+
+exports.addSavedRecipe = async (req, resp) => {
+  logger.info("control:add saved recipe");
+  try {
+    const { recipeId, userId } = req.body;
+    const userID = new ObjectId(userId);
+    const recipeID = new ObjectId(recipeId);
+    console.log(
+      `userID:${userID} typeof${typeof userID} and userID:${recipeID} typeof${typeof recipeID}`
+    );
+    if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+      logger.warn("invalid recipe id ");
+      errorResponse(resp, "recipe id is not valid", 400);
+    }
+    if (!mongoose.Types.ObjectId.isValid(userID)) {
+      logger.warn("invalid userID ");
+      errorResponse(resp, "user id is not valid", 400);
+    }
+    const user = await User.findById(userID);
+    console.log(user);
+    if (!user.savedRecipes.includes(recipeID)) {
+      user.savedRecipes.push(recipeID);
+      await user.save();
+    }
+    logger.info("recipe add in user savedRecipes");
+    successResponse(resp,data={},"recipe saved", 200);
+  } catch (error) {
+    console.log(error);
+    logger.error("internal server error");
+    return errorResponse(resp, "Internal server error", 500, error);
+  }
+};
+
+exports.allSavedRecipes=async(req,resp)=>{
+    try{
+      logger.info("control:get all saved recipe")
+      const {id}=req.params
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        logger.warn("invalid userID ");
+        errorResponse(resp, "user id is not valid", 400);
+      }
+      const user=await User.findById(id).populate("savedRecipes")
+      if(user===null){
+        logger.warn("user not found ");
+        errorResponse(resp, "user is not found", 404);
+      }
+      // console.log(user)
+      logger.info("recipe add in user savedRecipes");
+      successResponse(resp,user.savedRecipes, "all saved recipes:", 200);
+
+    }catch(error){
+      console.log(error);
+      logger.error("internal server error");
+      return errorResponse(resp, "Internal server error", 500, error);
+    }
+}
+
+exports.removeSavedRecipe=async(req,resp)=>{
+     try {
+       const { userId, recipeId } = req.params;
+
+       // Validate IDs
+       if (!mongoose.Types.ObjectId.isValid(userId)) {
+         return errorResponse(resp, "Invalid user ID", 400);
+       }
+
+       if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+         return errorResponse(resp, "Invalid recipe ID", 400);
+       }
+
+       // Find the user
+       const user = await User.findById(userId);
+       if (!user) {
+         return errorResponse(resp, "User not found", 404);
+       }
+
+       // Remove the recipe ID from the savedRecipes array
+       const beforeCount = user.savedRecipes.length;
+       user.savedRecipes = user.savedRecipes.filter(
+         (id) => id.toString() !== recipeId
+       );
+
+       // If nothing was removed
+       if (beforeCount === user.savedRecipes.length) {
+         return errorResponse(resp, "Recipe not found in saved list", 404);
+       }
+
+       await user.save();
+       return successResponse(resp, "Recipe removed from saved list", 200);
+     } catch (error) {
+       console.error(error);
+       return errorResponse(resp, "Internal Server Error", 500, error);
+     }
+}

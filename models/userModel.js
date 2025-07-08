@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide password"],
       minlength: 8,
-    //   select: false, // Exclude by default in queries
+      //   select: false, // Exclude by default in queries
     },
     role: {
       type: String,
@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "approved", "blocked"],
       default: "approved",
+    },
+    savedRecipes: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "recipes",
+        default: [],
     },
   },
   {
