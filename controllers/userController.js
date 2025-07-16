@@ -112,6 +112,38 @@ exports.update = async (req, resp) => {
 };
 
 
+exports.userInfo=async(req,resp)=>{
+  logger.info("Controls:get user info")
+  try{
+    const {userId}=req.params
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      logger.warn("invalid userID ");
+      errorResponse(resp, "user id is not valid", 400);
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      logger.warn("user not found");
+      return errorResponse(resp, "User not found", 404);
+    }
+    //temporory we send only following info we need more add in response data
+    const responseData = {
+      userID: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      createAt:user.createdAt,
+    };
+    logger.info("found user info by user id")
+    successResponse(resp,responseData,"user information",200)
+
+  }catch(err){
+    console.log(err);
+    logger.error("internal server error");
+    return errorResponse(resp, "Internal server error", 500, err);
+  }
+
+}
+
 exports.addSavedRecipe = async (req, resp) => {
   logger.info("control:add saved recipe");
   try {
